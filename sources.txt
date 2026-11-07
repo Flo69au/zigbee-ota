@@ -1,0 +1,5 @@
+# Index OTA des projets Zigbee à fusionner (une URL par ligne, # = commentaire)
+# Chaque projet publie son propre ota_index.json ; ce dépôt les regroupe pour Zigbee2MQTT.
+https://raw.githubusercontent.com/Flo69au/capteur-temp-rature-scd40_zigbee/main/ota_index.json
+https://raw.githubusercontent.com/Flo69au/levoit-classic-300s-zigbee/main/ota_index.json
+https://raw.githubusercontent.com/Flo69au/sonde-zigbee-radiateur/main/ota_index.json
