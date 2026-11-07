@@ -1,0 +1,114 @@
+# Regroupe les index OTA de tous les projets Zigbee (liste dans sources.txt)
+# en un seul ota_index.json, celui que lit Zigbee2MQTT :
+#
+#   ota:
+#     zigbee_ota_override_index_location: https://raw.githubusercontent.com/Flo69au/zigbee-ota/main/ota_index.json
+#
+# Lancement : toutes les heures, à chaque modification de sources.txt, et à la
+# demande (onglet Actions -> Fusion des index OTA -> Run workflow).
+
+name: Fusion des index OTA
+
+on:
+  schedule:
+    - cron: '23 * * * *'   # toutes les heures (à hh:23)
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['sources.txt', '.github/workflows/merge-index.yml']
+
+permissions:
+  contents: write
+
+concurrency:
+  group: merge-index
+  cancel-in-progress: false
+
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Fusionner les index
+        run: |
+          python3 - <<'PYEOF'
+          import json, re, sys, urllib.request
+
+          REQUIRED = ("url", "fileVersion", "imageType", "manufacturerCode")
+
+          def repo_from(url):
+              m = re.match(r"https://(?:raw\.githubusercontent\.com|github\.com)/([^/]+/[^/]+)/", url or "")
+              return m.group(1).lower() if m else None
+
+          sources = [l.strip() for l in open("sources.txt", encoding="utf-8")
+                     if l.strip() and not l.strip().startswith("#")]
+          try:
+              old = json.load(open("ota_index.json", encoding="utf-8"))
+          except Exception:
+              old = []
+
+          merged = []
+          for src in sources:
+              repo = repo_from(src)
+              try:
+                  req = urllib.request.Request(src, headers={"Cache-Control": "no-cache"})
+                  with urllib.request.urlopen(req, timeout=30) as r:
+                      entries = json.load(r)
+                  if not isinstance(entries, list):
+                      raise ValueError("le fichier n'est pas une liste JSON")
+                  good = []
+                  for e in entries:
+                      missing = [k for k in REQUIRED if k not in e]
+                      if missing:
+                          print(f"::warning::{src} : entrée ignorée, champs manquants {missing}")
+                          continue
+                      if e.get("force"):
+                          print(f"::warning::{src} : \"force\": true sur {e['url']} -> MAJ proposée en boucle")
+                      good.append(e)
+                  print(f"OK  {src} : {len(good)} entrée(s)")
+                  merged += good
+              except Exception as ex:
+                  # Index inaccessible : on garde les anciennes entrées de ce projet
+                  keep = [e for e in old if repo and repo_from(e.get("url")) == repo]
+                  print(f"::warning::{src} inaccessible ({ex}) : {len(keep)} ancienne(s) entrée(s) conservée(s)")
+                  merged += keep
+
+          # Dédoublonnage par URL (un projet peut contenir une copie d'une autre entrée)
+          seen, out = set(), []
+          for e in merged:
+              if e["url"] not in seen:
+                  seen.add(e["url"])
+                  out.append(e)
+
+          # Sécurité : un couple fabricant / type d'image ne doit appartenir qu'à un seul
+          # projet, sinon Z2M pourrait envoyer le firmware d'un appareil à un autre.
+          owners = {}
+          for e in out:
+              key = (e["manufacturerCode"], e["imageType"])
+              owners.setdefault(key, set()).add(repo_from(e["url"]))
+          conflicts = {k: v for k, v in owners.items() if len(v) > 1}
+          if conflicts:
+              for (m, t), repos in conflicts.items():
+                  print(f"::error::fabricant 0x{m:04X} / type {t} utilisé par plusieurs projets : {sorted(repos)}")
+              sys.exit(1)
+
+          out.sort(key=lambda e: (e["manufacturerCode"], e["imageType"], e["fileVersion"]))
+          with open("ota_index.json", "w", encoding="utf-8") as f:
+              json.dump(out, f, indent=2, ensure_ascii=False)
+              f.write("\n")
+          for e in out:
+              print(f"  0x{e['manufacturerCode']:04X} / type {e['imageType']} / version {e['fileVersion']} : {e['url']}")
+          PYEOF
+
+      - name: Publier l'index s'il a changé
+        run: |
+          if git diff --quiet -- ota_index.json; then
+            echo "Index inchangé."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add ota_index.json
+          git commit -m "Index OTA mis à jour"
+          git push
