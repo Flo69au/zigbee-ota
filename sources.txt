@@ -3,3 +3,4 @@
 https://raw.githubusercontent.com/Flo69au/capteur-temp-rature-scd40_zigbee/main/ota_index.json
 https://raw.githubusercontent.com/Flo69au/levoit-classic-300s-zigbee/main/ota_index.json
 https://raw.githubusercontent.com/Flo69au/sonde-zigbee-radiateur/main/ota_index.json
+https://raw.githubusercontent.com/Flo69au/capteur-co2-scd40-esp32h2/main/ota_index.json
