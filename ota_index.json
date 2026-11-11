@@ -1,5 +1,15 @@
 [
   {
+    "fileName": "131B-0000-01010000-ota-file.zigbee",
+    "fileVersion": 16842752,
+    "fileSize": 730478,
+    "url": "https://github.com/Flo69au/levoit-classic-300s-zigbee/releases/download/v1.1/131B-0000-01010000-ota-file.zigbee",
+    "imageType": 0,
+    "manufacturerCode": 4891,
+    "modelId": "Classic300S-Fan",
+    "sha512": "350a606421c548dad66e847b14da73893cbf9c87a1f5e539f9a09c76b048f196158457e8c7ddd3e1b7b17a078eaeb20244b4a5e4f1b30ddb47c6780e97a9879a"
+  },
+  {
     "fileName": "1337-0001-01020000-ota-file.zigbee",
     "fileVersion": 16908288,
     "fileSize": 746814,
@@ -17,7 +27,7 @@
     "imageType": 2,
     "manufacturerCode": 4919,
     "modelId": "H2-2xDS18B20",
-    "sha512": "1797f9884c4f3f2f75f91a088081e32e4bb588ce74d41e41e9604b14278a1043f761708689bcf6972582facfa8c9b6949735298ad93b49cdfaca76c790dc03eb"
+    "sha512": "782d0440e0d4317ddcefe7cd43bc0ab3242557a7c4fab7fb63f54bae82b02d13ae29bfdceea17d656b7f42a9d0d6fdd1aeb67fdbd6d8c172ed6049e7a42d88b4"
   },
   {
     "fileName": "1337-0003-01030000-ota-file.zigbee",
@@ -27,6 +37,6 @@
     "imageType": 3,
     "manufacturerCode": 4919,
     "modelId": "H2-SCD40-CO2",
-    "sha512": "1bc4cd8c27b9197785c563c57b27171acb54eb5b3886c2b714d1779d4270c02530b6b0c9af0991150697f6aaa3d8d3d2ef8988c3d00fedd3d71dd9a770953cfd"
+    "sha512": "c01a7925977df246a869a10f441550713161bf56916743433103a442b1a25e6dc478df56199ba458f041951673e9f80663f331bd26b6f0997a208c489f798626"
   }
 ]
